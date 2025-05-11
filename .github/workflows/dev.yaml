@@ -6,7 +6,7 @@ on:
 
 jobs:
   call-reusable:
-    uses: ./.github/workflows/buildPush.yml
+    uses: ./.github/workflows/buildPush.yaml
     with:
       image_tag_prefix: dev                     # 🆕 Prefix for the environment
       version_suffix: ${{ github.sha }}         # 🆕 Adds commit SHA to uniquely version each build
