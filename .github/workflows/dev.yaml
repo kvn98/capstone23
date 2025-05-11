@@ -2,7 +2,7 @@ name: CI/CD (Dev)
 
 on:
   pull_request:
-    branches: [dev]  # Same as before
+    branches: [main]  # Same as before
 
 jobs:
   call-reusable:
