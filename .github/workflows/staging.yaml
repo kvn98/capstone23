@@ -1,0 +1,13 @@
+name: CI/CD (Staging)
+
+on:
+  pull_request:
+    branches: [staging]
+
+jobs:
+  call-reusable:
+    uses: ./.github/workflows/buildPush.yaml
+    with:
+      image_tag_prefix: staging
+      version_suffix: pr${{ github.event.pull_request.number }}-${{ github.sha }}
+      # 🆕 Tag will look like: staging-pr17-abc123
