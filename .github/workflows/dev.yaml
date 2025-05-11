@@ -10,4 +10,3 @@ jobs:
     with:
       image_tag_prefix: dev                     # 🆕 Prefix for the environment
       version_suffix: ${{ github.sha }}         # 🆕 Adds commit SHA to uniquely version each build
-# new comment
