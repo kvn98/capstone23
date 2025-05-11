@@ -2,11 +2,12 @@ name: CI/CD (Dev)
 
 on:
   pull_request:
-    branches: [dev]  # Same as before
+    branches: [main]  # Same as before
 
 jobs:
   call-reusable:
-    uses: ./.github/workflows/buildPush.yml
+    uses: ./.github/workflows/buildPush.yaml
     with:
       image_tag_prefix: dev                     # 🆕 Prefix for the environment
       version_suffix: ${{ github.sha }}         # 🆕 Adds commit SHA to uniquely version each build
+      aws-region: ${{ secrets.AWS_REGION }} 
