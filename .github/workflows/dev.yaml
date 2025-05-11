@@ -1,0 +1,12 @@
+name: CI/CD (Dev)
+
+on:
+  pull_request:
+    branches: [dev]  # Same as before
+
+jobs:
+  call-reusable:
+    uses: ./.github/workflows/build-and-push.yml
+    with:
+      image_tag_prefix: dev                     # 🆕 Prefix for the environment
+      version_suffix: ${{ github.sha }}         # 🆕 Adds commit SHA to uniquely version each build

@@ -1,0 +1,44 @@
+name: Reusable - Build and Push Docker Image
+
+on:
+  workflow_call:
+    inputs:
+      image_tag_prefix:       # 🆕 Replaces fixed environment tags (e.g. dev/staging/prod)
+        required: true
+        type: string
+      version_suffix:         # 🆕 Optional version suffix (commit SHA, PR #, tag, etc.)
+        required: false
+        type: string
+
+jobs:
+  build-push-image:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ secrets.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Login to Amazon ECR
+        id: login-to-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push Docker image
+        env:
+          REGISTRY: ${{ steps.login-to-ecr.outputs.registry }}
+          REPOSITORY: cp2-githubactions
+
+          # 🆕 These two env vars dynamically build the tag
+          TAG_SUFFIX: ${{ inputs.version_suffix != '' && format('-{0}', inputs.version_suffix) || '' }}
+          TAG_FULL: ${{ inputs.image_tag_prefix }}${{ inputs.version_suffix != '' && format('-{0}', inputs.version_suffix) || '' }}
+
+        run: |
+          echo "Using image tag: $TAG_FULL"
+          docker build -t $REPOSITORY .
+          docker tag $REPOSITORY:latest $REGISTRY/$REPOSITORY:$TAG_FULL
+          docker push $REGISTRY/$REPOSITORY:$TAG_FULL
