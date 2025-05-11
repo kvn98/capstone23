@@ -10,4 +10,4 @@ jobs:
     with:
       image_tag_prefix: staging
       version_suffix: pr${{ github.event.pull_request.number }}-${{ github.sha }}
-      # 🆕 Tag will look like: staging-pr17-abc123
+
