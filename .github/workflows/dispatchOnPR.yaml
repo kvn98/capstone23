@@ -3,43 +3,41 @@ name: CI/CD Dispatch on PR to Main
 on:
   pull_request:
     branches:
-      - main  # Trigger when a PR is opened into main
+      - main
 
 jobs:
-  detect-source-and-run:
+  detect-source:
     runs-on: ubuntu-latest
-
+    outputs:
+      source_branch: ${{ steps.get_branch.outputs.source_branch }}
     steps:
-      # ✅ Step 1: Checkout the repo so local workflows are accessible
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      # ✅ Step 2: Get the source branch of the PR (e.g., dev, staging, prod)
       - name: Get source branch
-        id: source
-        run: |
-          echo "source_branch=${{ github.head_ref }}" >> $GITHUB_OUTPUT
+        id: get_branch
+        run: echo "source_branch=${{ github.head_ref }}" >> $GITHUB_OUTPUT
 
-      # ✅ Step 3: Call the dev workflow if the PR is from dev
-      - name: Call dev workflow
-        if: ${{ github.head_ref == 'dev' }}
-        uses: ./.github/workflows/buildPush.yaml
-        with:
-          image_tag_prefix: dev
-          version_suffix: pr${{ github.event.pull_request.number }}-${{ github.sha }}
+  dev:
+    if: ${{ needs.detect-source.outputs.source_branch == 'dev' }}
+    needs: detect-source
+    uses: ./.github/workflows/buildPush.yaml
+    with:
+      image_tag_prefix: dev
+      version_suffix: pr${{ github.event.pull_request.number }}-${{ github.sha }}
 
-      # ✅ Step 4: Call the staging workflow if the PR is from staging
-      - name: Call staging workflow
-        if: ${{ github.head_ref == 'staging' }}
-        uses: ./.github/workflows/buildPush.yaml
-        with:
-          image_tag_prefix: staging
-          version_suffix: pr${{ github.event.pull_request.number }}-${{ github.sha }}
+  staging:
+    if: ${{ needs.detect-source.outputs.source_branch == 'staging' }}
+    needs: detect-source
+    uses: ./.github/workflows/buildPush.yaml
+    with:
+      image_tag_prefix: staging
+      version_suffix: pr${{ github.event.pull_request.number }}-${{ github.sha }}
 
-      # ✅ Step 5: Call the prod workflow if the PR is from prod
-      - name: Call prod workflow
-        if: ${{ github.head_ref == 'prod' }}
-        uses: ./.github/workflows/buildPush.yaml
-        with:
-          image_tag_prefix: prod
-          version_suffix: pr${{ github.event.pull_request.number }}-${{ github.sha }}
+  prod:
+    if: ${{ needs.detect-source.outputs.source_branch == 'prod' }}
+    needs: detect-source
+    uses: ./.github/workflows/buildPush.yaml
+    with:
+      image_tag_prefix: prod
+      version_suffix: pr${{ github.event.pull_request.number }}-${{ github.sha }}
