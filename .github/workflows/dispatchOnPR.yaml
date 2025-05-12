@@ -8,40 +8,38 @@ on:
 jobs:
   detect-source-and-run:
     runs-on: ubuntu-latest
+    outputs:
+      source_branch: ${{ steps.get_branch.outputs.source_branch }}
 
     steps:
-      # ✅ Step 1: Checkout the repo so local workflows are accessible
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-
-
-      # ✅ Step 3: Get the source branch of the PR (e.g., dev, staging, prod)
       - name: Get source branch
-        id: source
-        run: |
-          echo "source_branch=${{ github.head_ref }}" >> $GITHUB_OUTPUT
+        id: get_branch
+        run: echo "source_branch=${{ github.head_ref }}" >> $GITHUB_OUTPUT
 
-      # ✅ Step 4: Call the dev workflow if the PR is from dev
-      - name: Call dev workflow
-        if: ${{ github.head_ref == 'dev' }}
-        uses: ./.github/workflows/buildPush.yaml
-        with:
-          image_tag_prefix: dev
-          version_suffix: pr${{ github.event.pull_request.number }}-${{ github.sha }}
+  dev:
+    if: ${{ needs.detect-source.outputs.source_branch == 'dev' }}
+    needs: detect-source
+    uses: ./.github/workflows/buildPush.yaml
+    with:
+      image_tag_prefix: dev
+      version_suffix: pr${{ github.event.pull_request.number }}-${{ github.sha }}
 
-      # ✅ Step 5: Call the staging workflow if the PR is from staging
-      - name: Call staging workflow
-        if: ${{ github.head_ref == 'staging' }}
-        uses: ./.github/workflows/buildPush.yaml
-        with:
-          image_tag_prefix: staging
-          version_suffix: pr${{ github.event.pull_request.number }}-${{ github.sha }}
+  staging:
+    if: ${{ needs.detect-source.outputs.source_branch == 'staging' }}
+    needs: detect-source
+    uses: ./.github/workflows/buildPush.yaml
+    with:
+      image_tag_prefix: staging
+      version_suffix: pr${{ github.event.pull_request.number }}-${{ github.sha }}
 
-      # ✅ Step 6: Call the prod workflow if the PR is from prod
-      - name: Call prod workflow
-        if: ${{ github.head_ref == 'prod' }}
-        uses: ./.github/workflows/buildPush.yaml
-        with:
-          image_tag_prefix: prod
-          version_suffix: pr${{ github.event.pull_request.number }}-${{ github.sha }}
+  prod:
+    if: ${{ needs.detect-source.outputs.source_branch == 'prod' }}
+    needs: detect-source
+    uses: ./.github/workflows/buildPush.yaml
+    with:
+      image_tag_prefix: prod
+      version_suffix: pr${{ github.event.pull_request.number }}-${{ github.sha }}
+#added comment
