@@ -3,13 +3,14 @@ name: CI/CD Dispatch on PR to Main
 on:
   pull_request:
     branches:
-      - main
+      - main  # Trigger when a PR is opened into main
 
 jobs:
-  detect-source:
+  detect-source-and-run:
     runs-on: ubuntu-latest
     outputs:
       source_branch: ${{ steps.get_branch.outputs.source_branch }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -41,3 +42,4 @@ jobs:
     with:
       image_tag_prefix: prod
       version_suffix: pr${{ github.event.pull_request.number }}-${{ github.sha }}
+#added comment

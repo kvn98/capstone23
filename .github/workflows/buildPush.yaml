@@ -18,23 +18,39 @@ jobs:
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
-        
-      - name: Debug event
-        run: echo "Triggered by: ${{ github.event_name }}"
 
-      # ✅ Debug step: Confirm secrets exist without leaking values
-      - name: Check if required secrets are available
+
+
+      # ✅ Debug: Confirm all secrets are present
+      - name: Debug secrets presence
         run: |
-          if [ -z "${{ secrets.AWS_REGION }}" ]; then echo "❌ AWS_REGION is missing"; exit 1; else echo "✅ AWS_REGION is set"; fi
-          if [ -z "${{ secrets.AWS_ACCESS_KEY_ID }}" ]; then echo "❌ AWS_ACCESS_KEY_ID is missing"; exit 1; else echo "✅ AWS_ACCESS_KEY_ID is set"; fi
-          if [ -z "${{ secrets.AWS_SECRET_ACCESS_KEY }}" ]; then echo "❌ AWS_SECRET_ACCESS_KEY is missing"; exit 1; else echo "✅ AWS_SECRET_ACCESS_KEY is set"; fi
+          if [ -z "${{ secrets.REGION }}" ]; then
+            echo "❌ REGION is missing"
+            exit 1
+          else
+            echo "✅ AWS_REGION is set"
+          fi
+
+          if [ -z "${{ secrets.ACCESSID }}" ]; then
+            echo "❌ ACCESSID is missing"
+            exit 1
+          else
+            echo "✅ AWS_ACCESS_KEY_ID is set"
+          fi
+
+          if [ -z "${{ secrets.ACCESSSECRET }}" ]; then
+            echo "❌ ACCESSSECRET is missing"
+            exit 1
+          else
+            echo "✅ AWS_SECRET_ACCESS_KEY is set"
+          fi
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-region: ${{ secrets.AWS_REGION }}
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.REGION }}
+          aws-access-key-id: ${{ secrets.ACCESSID }}
+          aws-secret-access-key: ${{ secrets.ACCESSSECRET }}
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -47,11 +63,11 @@ jobs:
           IMAGE_TAG_PREFIX: ${{ inputs.image_tag_prefix }}
           VERSION_SUFFIX: ${{ inputs.version_suffix }}
         run: |
-          echo "Building Docker image..."
+          echo "📦 Building Docker image..."
           docker build -t $REPOSITORY .
 
-          echo "Tagging Docker image..."
+          echo "🏷️ Tagging Docker image..."
           docker tag $REPOSITORY:latest $REGISTRY/$REPOSITORY:${IMAGE_TAG_PREFIX}-${VERSION_SUFFIX}
 
-          echo "Pushing Docker image to ECR..."
+          echo "🚀 Pushing Docker image to ECR..."
           docker push $REGISTRY/$REPOSITORY:${IMAGE_TAG_PREFIX}-${VERSION_SUFFIX}
