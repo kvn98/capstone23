@@ -1,0 +1,36 @@
+name: CI/CD Dispatch on PR to Main
+
+on:
+  pull_request:
+    branches:
+      - main  # Trigger only when PR is opened into main
+
+jobs:
+  detect-source-and-run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get source branch
+        id: source
+        run: |
+          echo "source_branch=${{ github.head_ref }}" >> $GITHUB_OUTPUT
+
+      - name: Call dev workflow
+        if: ${{ github.head_ref == 'dev' }}
+        uses: ./.github/workflows/buildPush.yaml
+        with:
+          image_tag_prefix: dev
+          version_suffix: pr${{ github.event.pull_request.number }}-${{ github.sha }}
+
+      - name: Call staging workflow
+        if: ${{ github.head_ref == 'staging' }}
+        uses: ./.github/workflows/buildPush.yaml
+        with:
+          image_tag_prefix: staging
+          version_suffix: pr${{ github.event.pull_request.number }}-${{ github.sha }}
+
+      - name: Call prod workflow
+        if: ${{ github.head_ref == 'prod' }}
+        uses: ./.github/workflows/buildPush.yaml
+        with:
+          image_tag_prefix: prod
+          version_suffix: pr${{ github.event.pull_request.number }}-${{ github.sha }}
