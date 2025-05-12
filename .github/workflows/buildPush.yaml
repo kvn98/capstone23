@@ -18,6 +18,9 @@ jobs:
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
+        
+      - name: Debug event
+        run: echo "Triggered by: ${{ github.event_name }}"
 
       # ✅ Debug step: Confirm secrets exist without leaking values
       - name: Check if required secrets are available
