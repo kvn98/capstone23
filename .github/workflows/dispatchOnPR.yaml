@@ -14,22 +14,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ✅ Step 2: Check if AWS secrets are set
-      - name: Validate AWS Secrets
-        run: |
-          if [ -z "${{ secrets.REGION }}" ]; then
-            echo "❌ REGION is missing"
-            exit 1
-          fi
-          if [ -z "${{ secrets.ACCESSID }}" ]; then
-            echo "❌ ACCESSID is missing"
-            exit 1
-          fi
-          if [ -z "${{ secrets.ACCESSSECRET }}" ]; then
-            echo "❌ ACCESSSECRET is missing"
-            exit 1
-          fi
-          echo "✅ All required AWS secrets are set"
+
 
       # ✅ Step 3: Get the source branch of the PR (e.g., dev, staging, prod)
       - name: Get source branch
