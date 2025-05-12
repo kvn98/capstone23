@@ -23,15 +23,15 @@ jobs:
       # Step 3: Dispatch to staging workflow
       - name: Call staging workflow (if from staging)
         if: ${{ github.head_ref == 'staging' }}
-        uses: ./.github/workflows/buildPush.yaml
+        uses: kvn98/capstone23/.github/workflows/buildPush.yaml@staging
         with:
           image_tag_prefix: staging
           version_suffix: pr${{ github.event.pull_request.number }}-${{ github.sha }}
 
-      # Step 4: Dispatch to test workflow
+      # Step 4: Dispatch to prod workflow
       - name: Call test workflow (if from prod)
         if: ${{ github.head_ref == 'prod' }}
-        uses: ./.github/workflows/buildPush.yaml
+        uses: kvn98/capstone23/.github/workflows/buildPush.yaml@prod
         with:
           image_tag_prefix: prod
           version_suffix: pr${{ github.event.pull_request.number }}-${{ github.sha }}
@@ -39,7 +39,7 @@ jobs:
       # Step 5: Dispatch to dev workflow
       - name: Call dev workflow (if from dev)
         if: ${{ github.head_ref == 'dev' }}
-        uses: ./.github/workflows/buildPush.yaml
+        uses: kvn98/capstone23/.github/workflows/buildPush.yaml@dev
         with:
           image_tag_prefix: dev
           version_suffix: pr${{ github.event.pull_request.number }}-${{ github.sha }}
