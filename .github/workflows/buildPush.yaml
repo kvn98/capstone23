@@ -19,9 +19,7 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
 
-      # ✅ Debug: Check triggering event
-      - name: Debug GitHub event
-        run: echo "🔁 Triggered by: ${{ github.event_name }}"
+
 
       # ✅ Debug: Confirm all secrets are present
       - name: Debug secrets presence
