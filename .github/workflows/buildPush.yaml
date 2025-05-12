@@ -52,3 +52,4 @@ jobs:
 
           echo "Pushing Docker image to ECR..."
           docker push $REGISTRY/$REPOSITORY:${IMAGE_TAG_PREFIX}-${VERSION_SUFFIX}
+# added comment
