@@ -3,50 +3,43 @@ name: CI/CD Dispatch on PR to Main
 on:
   pull_request:
     branches:
-      - main  # Trigger when PR is opened into main from any branch
+      - main  # Trigger when a PR is opened into main
 
 jobs:
   detect-source-and-run:
     runs-on: ubuntu-latest
 
     steps:
-      # ✅ Step 1: Checkout the repository so local workflows can be found
+      # ✅ Step 1: Checkout the repo so local workflows are accessible
       - name: Checkout repository
         uses: actions/checkout@v4
-      
-      # Step 2: Run the local action
-      - name: Run local action
-        uses: ./buildPush.yaml
 
-      # Step 3: Get the source branch name
+      # ✅ Step 2: Get the source branch of the PR (e.g., dev, staging, prod)
       - name: Get source branch
         id: source
         run: |
           echo "source_branch=${{ github.head_ref }}" >> $GITHUB_OUTPUT
 
-      # Step 4: Dispatch to staging workflow
-      - name: Call staging workflow (if from staging)
+      # ✅ Step 3: Call the dev workflow if the PR is from dev
+      - name: Call dev workflow
+        if: ${{ github.head_ref == 'dev' }}
+        uses: ./.github/workflows/buildPush.yaml
+        with:
+          image_tag_prefix: dev
+          version_suffix: pr${{ github.event.pull_request.number }}-${{ github.sha }}
+
+      # ✅ Step 4: Call the staging workflow if the PR is from staging
+      - name: Call staging workflow
         if: ${{ github.head_ref == 'staging' }}
         uses: ./.github/workflows/buildPush.yaml
         with:
           image_tag_prefix: staging
           version_suffix: pr${{ github.event.pull_request.number }}-${{ github.sha }}
 
-      # Step 5: Dispatch to prod workflow
-      - name: Call test workflow (if from prod)
+      # ✅ Step 5: Call the prod workflow if the PR is from prod
+      - name: Call prod workflow
         if: ${{ github.head_ref == 'prod' }}
         uses: ./.github/workflows/buildPush.yaml
         with:
           image_tag_prefix: prod
           version_suffix: pr${{ github.event.pull_request.number }}-${{ github.sha }}
-
-      # Step 6: Dispatch to dev workflow
-      - name: Call dev workflow (if from dev)
-        if: ${{ github.head_ref == 'dev' }}
-        uses: ./.github/workflows/buildPush.yaml
-        with:
-          image_tag_prefix: dev
-          version_suffix: pr${{ github.event.pull_request.number }}-${{ github.sha }}
-#added simple comments
-
-
