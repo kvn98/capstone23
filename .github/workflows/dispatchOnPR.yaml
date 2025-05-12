@@ -13,14 +13,18 @@ jobs:
       # ✅ Step 1: Checkout the repository so local workflows can be found
       - name: Checkout repository
         uses: actions/checkout@v4
+      
+      # Step 2: Run the local action
+      - name: Run local action
+        uses: ./buildPush.yaml
 
-      # Step 2: Get the source branch name
+      # Step 3: Get the source branch name
       - name: Get source branch
         id: source
         run: |
           echo "source_branch=${{ github.head_ref }}" >> $GITHUB_OUTPUT
 
-      # Step 3: Dispatch to staging workflow
+      # Step 4: Dispatch to staging workflow
       - name: Call staging workflow (if from staging)
         if: ${{ github.head_ref == 'staging' }}
         uses: ./.github/workflows/buildPush.yaml
@@ -28,7 +32,7 @@ jobs:
           image_tag_prefix: staging
           version_suffix: pr${{ github.event.pull_request.number }}-${{ github.sha }}
 
-      # Step 4: Dispatch to prod workflow
+      # Step 5: Dispatch to prod workflow
       - name: Call test workflow (if from prod)
         if: ${{ github.head_ref == 'prod' }}
         uses: ./.github/workflows/buildPush.yaml
@@ -36,7 +40,7 @@ jobs:
           image_tag_prefix: prod
           version_suffix: pr${{ github.event.pull_request.number }}-${{ github.sha }}
 
-      # Step 5: Dispatch to dev workflow
+      # Step 6: Dispatch to dev workflow
       - name: Call dev workflow (if from dev)
         if: ${{ github.head_ref == 'dev' }}
         uses: ./.github/workflows/buildPush.yaml
