@@ -26,9 +26,26 @@ jobs:
       # ✅ Debug: Confirm all secrets are present
       - name: Debug secrets presence
         run: |
-          if [ -z "${{ secrets.AWS_REGION }}" ]; then echo "❌ AWS_REGION is missing"; exit 1; else echo "✅ AWS_REGION is set"; fi
-          if [ -z "${{ secrets.AWS_ACCESS_KEY_ID }}" ]; then echo "❌ AWS_ACCESS_KEY_ID is missing"; exit 1; else echo "✅ AWS_ACCESS_KEY_ID is set"; fi
-          if [ -z "${{ secrets.AWS_SECRET_ACCESS_KEY }}" ]; then echo "❌ AWS_SECRET_ACCESS_KEY is missing"; exit 1; else echo "✅ AWS_SECRET_ACCESS_KEY is set"; fi
+          if [ -z "${{ secrets.AWS_REGION }}" ]; then
+            echo "❌ AWS_REGION is missing"
+            exit 1
+          else
+            echo "✅ AWS_REGION is set"
+          fi
+
+          if [ -z "${{ secrets.AWS_ACCESS_KEY_ID }}" ]; then
+            echo "❌ AWS_ACCESS_KEY_ID is missing"
+            exit 1
+          else
+            echo "✅ AWS_ACCESS_KEY_ID is set"
+          fi
+
+          if [ -z "${{ secrets.AWS_SECRET_ACCESS_KEY }}" ]; then
+            echo "❌ AWS_SECRET_ACCESS_KEY is missing"
+            exit 1
+          else
+            echo "✅ AWS_SECRET_ACCESS_KEY is set"
+          fi
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -45,3 +62,14 @@ jobs:
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: cp2-githubactions
+          IMAGE_TAG_PREFIX: ${{ inputs.image_tag_prefix }}
+          VERSION_SUFFIX: ${{ inputs.version_suffix }}
+        run: |
+          echo "📦 Building Docker image..."
+          docker build -t $REPOSITORY .
+
+          echo "🏷️ Tagging Docker image..."
+          docker tag $REPOSITORY:latest $REGISTRY/$REPOSITORY:${IMAGE_TAG_PREFIX}-${VERSION_SUFFIX}
+
+          echo "🚀 Pushing Docker image to ECR..."
+          docker push $REGISTRY/$REPOSITORY:${IMAGE_TAG_PREFIX}-${VERSION_SUFFIX}
