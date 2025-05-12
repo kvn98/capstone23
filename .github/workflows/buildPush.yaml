@@ -18,18 +18,20 @@ jobs:
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
-      
-      - name: Check if secrets are available
-        run: |
-          echo "AWS Region: ${{ secrets.AWS_REGION }}"
-          echo "AWS Access Key ID: ${{ secrets.AWS_ACCESS_KEY_ID }}"
-          echo "AWS Secret Access Key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}"
 
+      - name: Debug: Confirm AWS secrets are loaded
+        run: |
+          echo "✅ AWS Region: ${{ secrets.AWS_REGION }}"
+          echo "✅ AWS Access Key ID is set: ${HAS_KEY}"
+          echo "✅ AWS Secret Access Key is set: ${HAS_SECRET}"
+        env:
+          HAS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID != '' && 'yes' || 'no' }}
+          HAS_SECRET: ${{ secrets.AWS_SECRET_ACCESS_KEY != '' && 'yes' || 'no' }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-region: us-west-2
+          aws-region: ${{ secrets.AWS_REGION }}
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
@@ -52,4 +54,3 @@ jobs:
 
           echo "Pushing Docker image to ECR..."
           docker push $REGISTRY/$REPOSITORY:${IMAGE_TAG_PREFIX}-${VERSION_SUFFIX}
-# added comment
